@@ -1,0 +1,800 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Image Gallery</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            color: #222;
+        }
+        /* HEADER */
+        
+        header {
+            background: #111;
+            color: white;
+            text-align: center;
+            padding: 45px 20px;
+        }
+        
+        header h1 {
+            font-size: 42px;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            color: #bbb;
+        }
+        /* UPLOAD SECTION */
+        
+        .upload-section {
+            text-align: center;
+            padding: 25px 15px 10px;
+        }
+        
+        .upload-btn {
+            display: inline-block;
+            background: #111;
+            color: white;
+            padding: 13px 25px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 16px;
+        }
+        
+        .upload-btn:hover {
+            background: #333;
+            transform: translateY(-2px);
+        }
+        
+        #imageUpload {
+            display: none;
+        }
+        /* FILTERS */
+        
+        .filters {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 25px 15px;
+        }
+        
+        .filter-btn {
+            border: none;
+            background: white;
+            padding: 11px 22px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+        
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: #111;
+            color: white;
+        }
+        /* GALLERY */
+        
+        .gallery {
+            width: 90%;
+            max-width: 1200px;
+            margin: auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding-bottom: 50px;
+        }
+        
+        .gallery-item {
+            height: 250px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .gallery-item:hover {
+            transform: translateY(-7px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: 0.5s;
+        }
+        
+        .gallery-item:hover img {
+            transform: scale(1.1);
+        }
+        /* IMAGE OVERLAY */
+        
+        .overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px;
+            color: white;
+            background: linear-gradient( transparent, rgba(0, 0, 0, 0.85));
+            opacity: 0;
+            transform: translateY(20px);
+            transition: 0.3s;
+        }
+        
+        .gallery-item:hover .overlay {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .overlay h3 {
+            font-size: 19px;
+        }
+        
+        .overlay p {
+            font-size: 13px;
+            margin-top: 5px;
+            color: #ddd;
+        }
+        /* LIGHTBOX */
+        
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.3s;
+            z-index: 1000;
+        }
+        
+        .lightbox.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .lightbox-content {
+            width: 90%;
+            max-width: 1000px;
+            text-align: center;
+        }
+        
+        .lightbox img {
+            max-width: 100%;
+            max-height: 75vh;
+            border-radius: 10px;
+        }
+        
+        .image-title {
+            color: white;
+            margin-top: 15px;
+            font-size: 20px;
+        }
+        /* CLOSE */
+        
+        .close {
+            position: absolute;
+            top: 25px;
+            right: 35px;
+            color: white;
+            font-size: 40px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .close:hover {
+            transform: rotate(90deg);
+        }
+        /* NEXT / PREVIOUS */
+        
+        .nav-btn {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 55px;
+            height: 55px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .nav-btn:hover {
+            background: white;
+            color: black;
+        }
+        
+        .prev {
+            left: 25px;
+        }
+        
+        .next {
+            right: 25px;
+        }
+        /* FOOTER */
+        
+        footer {
+            background: #111;
+            color: #aaa;
+            text-align: center;
+            padding: 25px;
+        }
+        /* TABLET */
+        
+        @media (max-width: 900px) {
+            .gallery {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            header h1 {
+                font-size: 35px;
+            }
+        }
+        /* MOBILE */
+        
+        @media (max-width: 650px) {
+            header h1 {
+                font-size: 28px;
+            }
+            .gallery {
+                width: 94%;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            .gallery-item {
+                height: 180px;
+            }
+            .overlay {
+                opacity: 1;
+                transform: translateY(0);
+                padding: 12px;
+            }
+            .overlay h3 {
+                font-size: 14px;
+            }
+            .overlay p {
+                font-size: 11px;
+            }
+            .nav-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 22px;
+            }
+            .prev {
+                left: 10px;
+            }
+            .next {
+                right: 10px;
+            }
+        }
+        /* SMALL MOBILE */
+        
+        @media (max-width: 400px) {
+            .gallery {
+                grid-template-columns: 1fr;
+            }
+            .gallery-item {
+                height: 240px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <h1>My Image Gallery</h1>
+        <p>Upload and explore your favorite photos</p>
+    </header>
+
+
+    <!-- UPLOAD -->
+    <section class="upload-section">
+
+        <label for="imageUpload" class="upload-btn">
+            📷 Upload Images
+        </label>
+
+        <input type="file" id="imageUpload" accept="image/*" multiple>
+
+    </section>
+
+
+    <!-- FILTERS -->
+    <div class="filters">
+
+        <button class="filter-btn active" data-filter="all">
+            All
+        </button>
+
+        <button class="filter-btn" data-filter="nature">
+            Nature
+        </button>
+
+        <button class="filter-btn" data-filter="city">
+            City
+        </button>
+
+        <button class="filter-btn" data-filter="travel">
+            Travel
+        </button>
+
+        <button class="filter-btn" data-filter="animals">
+            Animals
+        </button>
+
+    </div>
+
+
+    <!-- GALLERY -->
+    <main class="gallery" id="gallery">
+
+        <div class="gallery-item" data-category="nature" data-title="Beautiful Mountain">
+
+            <img src="https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=800&q=80" alt="Mountain">
+
+            <div class="overlay">
+                <h3>Beautiful Mountain</h3>
+                <p>Nature</p>
+            </div>
+
+        </div>
+
+
+        <div class="gallery-item" data-category="city" data-title="Modern City">
+
+            <img src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=800&q=80" alt="City">
+
+            <div class="overlay">
+                <h3>Modern City</h3>
+                <p>City</p>
+            </div>
+
+        </div>
+
+
+        <div class="gallery-item" data-category="travel" data-title="Beautiful Beach">
+
+            <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80" alt="Beach">
+
+            <div class="overlay">
+                <h3>Beautiful Beach</h3>
+                <p>Travel</p>
+            </div>
+
+        </div>
+
+
+        <div class="gallery-item" data-category="animals" data-title="Cute Fox">
+
+            <img src="https://images.unsplash.com/photo-1474511320723-9a56873867b5?auto=format&fit=crop&w=800&q=80" alt="Fox">
+
+            <div class="overlay">
+                <h3>Cute Fox</h3>
+                <p>Animals</p>
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- LIGHTBOX -->
+    <div class="lightbox" id="lightbox">
+
+        <span class="close" id="close">
+            &times;
+        </span>
+
+        <button class="nav-btn prev" id="prev">
+            &#10094;
+        </button>
+
+        <div class="lightbox-content">
+
+            <img id="lightboxImage" src="" alt="">
+
+            <div class="image-title" id="imageTitle"></div>
+
+        </div>
+
+        <button class="nav-btn next" id="next">
+            &#10095;
+        </button>
+
+    </div>
+
+
+    <!-- FOOTER -->
+    <footer>
+        <p>© 2026 My Image Gallery</p>
+    </footer>
+
+
+    <script>
+        const gallery = document.getElementById("gallery");
+
+        const uploadInput =
+            document.getElementById("imageUpload");
+
+        const lightbox =
+            document.getElementById("lightbox");
+
+        const lightboxImage =
+            document.getElementById("lightboxImage");
+
+        const imageTitle =
+            document.getElementById("imageTitle");
+
+        const closeBtn =
+            document.getElementById("close");
+
+        const nextBtn =
+            document.getElementById("next");
+
+        const prevBtn =
+            document.getElementById("prev");
+
+        const filterButtons =
+            document.querySelectorAll(".filter-btn");
+
+
+        let visibleItems = [];
+        let currentIndex = 0;
+
+
+        /* =========================
+           UPLOAD IMAGES
+        ========================= */
+
+        uploadInput.addEventListener("change", function() {
+
+            const files = this.files;
+
+            for (let file of files) {
+
+                // Check image
+                if (!file.type.startsWith("image/")) {
+                    continue;
+                }
+
+                // Create image URL
+                const imageURL =
+                    URL.createObjectURL(file);
+
+
+                // Create gallery item
+                const item =
+                    document.createElement("div");
+
+                item.classList.add("gallery-item");
+
+                item.dataset.category = "uploaded";
+
+                item.dataset.title =
+                    file.name;
+
+
+                // Add image
+                item.innerHTML = `
+
+                    <img
+                        src="${imageURL}"
+                        alt="${file.name}"
+                    >
+
+                    <div class="overlay">
+
+                        <h3>${file.name}</h3>
+
+                        <p>Uploaded Image</p>
+
+                    </div>
+
+                `;
+
+
+                // Add to gallery
+                gallery.appendChild(item);
+
+
+                // Click event
+                item.addEventListener("click", function() {
+
+                    updateVisibleItems();
+
+                    currentIndex =
+                        visibleItems.indexOf(item);
+
+                    openLightbox(currentIndex);
+
+                });
+
+            }
+
+
+            // Reset input
+            uploadInput.value = "";
+
+        });
+
+
+        /* =========================
+           UPDATE VISIBLE IMAGES
+        ========================= */
+
+        function updateVisibleItems() {
+
+            visibleItems = [...document.querySelectorAll(
+                ".gallery-item"
+            )].filter(item => {
+
+                return item.style.display !== "none";
+
+            });
+
+        }
+
+
+        /* =========================
+           OPEN LIGHTBOX
+        ========================= */
+
+        function openLightbox(index) {
+
+            updateVisibleItems();
+
+            if (visibleItems.length === 0) {
+                return;
+            }
+
+            currentIndex = index;
+
+            const item =
+                visibleItems[currentIndex];
+
+            const img =
+                item.querySelector("img");
+
+
+            lightboxImage.src = img.src;
+
+            lightboxImage.alt = img.alt;
+
+            imageTitle.textContent =
+                item.dataset.title;
+
+
+            lightbox.classList.add("active");
+
+            document.body.style.overflow = "hidden";
+        }
+
+
+        /* =========================
+           CLOSE LIGHTBOX
+        ========================= */
+
+        function closeLightbox() {
+
+            lightbox.classList.remove("active");
+
+            document.body.style.overflow = "auto";
+        }
+
+
+        /* =========================
+           NEXT
+        ========================= */
+
+        function showNext() {
+
+            updateVisibleItems();
+
+            if (visibleItems.length === 0) {
+                return;
+            }
+
+            currentIndex++;
+
+            if (currentIndex >= visibleItems.length) {
+                currentIndex = 0;
+            }
+
+            openLightbox(currentIndex);
+        }
+
+
+        /* =========================
+           PREVIOUS
+        ========================= */
+
+        function showPrevious() {
+
+            updateVisibleItems();
+
+            if (visibleItems.length === 0) {
+                return;
+            }
+
+            currentIndex--;
+
+            if (currentIndex < 0) {
+                currentIndex =
+                    visibleItems.length - 1;
+            }
+
+            openLightbox(currentIndex);
+        }
+
+
+        /* =========================
+           EXISTING IMAGE CLICK
+        ========================= */
+
+        document
+            .querySelectorAll(".gallery-item")
+            .forEach(item => {
+
+                item.addEventListener("click", function() {
+
+                    updateVisibleItems();
+
+                    currentIndex =
+                        visibleItems.indexOf(this);
+
+                    openLightbox(currentIndex);
+
+                });
+
+            });
+
+
+        /* =========================
+           BUTTONS
+        ========================= */
+
+        closeBtn.addEventListener(
+            "click",
+            closeLightbox
+        );
+
+        nextBtn.addEventListener(
+            "click",
+            showNext
+        );
+
+        prevBtn.addEventListener(
+            "click",
+            showPrevious
+        );
+
+
+        /* =========================
+           CLOSE BY CLICKING OUTSIDE
+        ========================= */
+
+        lightbox.addEventListener(
+            "click",
+            function(event) {
+
+                if (event.target === lightbox) {
+                    closeLightbox();
+                }
+
+            }
+        );
+
+
+        /* =========================
+           KEYBOARD
+        ========================= */
+
+        document.addEventListener(
+            "keydown",
+            function(event) {
+
+                if (!lightbox.classList.contains("active")) {
+                    return;
+                }
+
+                if (event.key === "ArrowRight") {
+                    showNext();
+                }
+
+                if (event.key === "ArrowLeft") {
+                    showPrevious();
+                }
+
+                if (event.key === "Escape") {
+                    closeLightbox();
+                }
+
+            }
+        );
+
+
+        /* =========================
+           FILTER
+        ========================= */
+
+        filterButtons.forEach(button => {
+
+            button.addEventListener(
+                "click",
+                function() {
+
+                    // Active button
+                    filterButtons.forEach(btn => {
+                        btn.classList.remove("active");
+                    });
+
+                    this.classList.add("active");
+
+
+                    const filter =
+                        this.dataset.filter;
+
+
+                    // Filter images
+                    document
+                        .querySelectorAll(".gallery-item")
+                        .forEach(item => {
+
+                            const category =
+                                item.dataset.category;
+
+
+                            if (
+                                filter === "all" ||
+                                category === filter
+                            ) {
+
+                                item.style.display =
+                                    "block";
+
+                            } else {
+
+                                item.style.display =
+                                    "none";
+
+                            }
+
+                        });
+
+
+                    updateVisibleItems();
+
+                }
+            );
+
+        });
+    </script>
+
+</body>
+
+</html>
+```
